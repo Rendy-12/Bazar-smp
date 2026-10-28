@@ -27,25 +27,15 @@
 
     <!-- MAIN CONTAINER -->
     <main class="max-w-7xl mx-auto px-4 mt-4">
-        <!-- SEARCH & FILTER -->
-        <div class="bg-white p-3 rounded-lg shadow-sm mb-4 space-y-2">
-            <input type="text" placeholder="Cari makanan / minuman..." class="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <select class="w-full px-3 py-2 border rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Semua Kategori</option>
-                <option value="makanan">Makanan</option>
-                <option value="minuman">Minuman</option>
-            </select>
-        </div>
-
         <!-- TOMBOL KERANJANG -->
-        <button class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-bold mb-4 flex items-center justify-center space-x-2 shadow">
+        <button onclick="toggleModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-bold mb-4 flex items-center justify-center space-x-2 shadow">
             <i class="fa-solid fa-cart-shopping"></i>
-            <span>Keranjang ( 0 )</span>
+            <span>Keranjang ( <span id="cart-count">0</span> )</span>
         </button>
 
         <!-- DAFTAR PRODUK -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <!-- PRODUK 1: CORNDOG MOZZA -->
+            <!-- PRODUK: CORNDOG MOZZA -->
             <div class="bg-white rounded-xl shadow-sm border overflow-hidden product-card flex flex-col justify-between">
                 <div>
                     <img src="https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=500" alt="Corndog mozza" class="w-full h-36 object-cover">
@@ -57,7 +47,7 @@
                     </div>
                 </div>
                 <div class="p-3 pt-0">
-                    <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded-lg text-sm font-semibold flex items-center justify-center space-x-1">
+                    <button onclick="addToCart('Corndog mozza', 7000)" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded-lg text-sm font-semibold flex items-center justify-center space-x-1">
                         <i class="fa-solid fa-plus text-xs"></i>
                         <span>Tambah</span>
                     </button>
@@ -66,5 +56,95 @@
         </div>
     </main>
 
+    <!-- MODAL KERANJANG & PESAN -->
+    <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl p-5 max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-bold text-lg">Keranjang Belanja</h2>
+                <button onclick="toggleModal()" class="text-gray-500 font-bold text-xl">&times;</button>
+            </div>
+            
+            <div id="cart-items" class="space-y-2 mb-4">
+                <p class="text-sm text-gray-500 text-center">Keranjang masih kosong.</p>
+            </div>
+
+            <div class="border-t pt-3 mb-4">
+                <div class="flex justify-between font-bold text-base">
+                    <span>Total:</span>
+                    <span id="cart-total" class="text-blue-600">Rp 0</span>
+                </div>
+            </div>
+
+            <!-- FORM PEMESAN -->
+            <div class="space-y-3">
+                <input type="text" id="buyer-name" placeholder="Nama Pemesan / Kelas" class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button onclick="checkout()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-sm shadow">
+                    Kirim Pesanan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT JAVASCRIPT SYSTEM -->
+    <script>
+        let cart = [];
+
+        function addToCart(name, price) {
+            let item = cart.find(i => i.name === name);
+            if (item) {
+                item.qty++;
+            } else {
+                cart.push({ name: name, price: price, qty: 1 });
+            }
+            updateCartUI();
+            alert(name + " berhasil ditambahkan ke keranjang!");
+        }
+
+        function updateCartUI() {
+            let totalQty = cart.reduce((sum, i) => sum + i.qty, 0);
+            let totalPrice = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            
+            document.getElementById('cart-count').innerText = totalQty;
+            document.getElementById('cart-total').innerText = 'Rp ' + totalPrice.toLocaleString('id-ID');
+
+            let cartContainer = document.getElementById('cart-items');
+            if (cart.length === 0) {
+                cartContainer.innerHTML = '<p class="text-sm text-gray-500 text-center">Keranjang masih kosong.</p>';
+            } else {
+                cartContainer.innerHTML = cart.map(item => `
+                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded border text-sm">
+                        <div>
+                            <p class="font-semibold">${item.name}</p>
+                            <p class="text-xs text-gray-500">Rp ${item.price.toLocaleString('id-ID')} x ${item.qty}</p>
+                        </div>
+                        <p class="font-bold text-blue-600">Rp ${(item.price * item.qty).toLocaleString('id-ID')}</p>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function toggleModal() {
+            document.getElementById('cart-modal').classList.toggle('hidden');
+        }
+
+        function checkout() {
+            let name = document.getElementById('buyer-name').value;
+            if (!name) {
+                alert('Tolong isi nama pemesan / kelas dulu ya!');
+                return;
+            }
+            if (cart.length === 0) {
+                alert('Keranjang kamu masih kosong!');
+                return;
+            }
+
+            alert('Terima kasih ' + name + '! Pesanan kamu berhasil dibuat.');
+            cart = [];
+            document.getElementById('buyer-name').value = '';
+            updateCartUI();
+            toggleModal();
+        }
+    </script>
 </body>
 </html>
+
