@@ -328,7 +328,10 @@
         let products = JSON.parse(localStorage.getItem('bazar_products')) || defaultProducts;
         let cart = JSON.parse(localStorage.getItem('bazar_cart')) || [];
         let orders = JSON.parse(localStorage.getItem('bazar_orders')) || [];
+        
+        // URL SPREADSHEET DIBAWAH INI SUSAH DITANAM
         let sheetUrl = localStorage.getItem('bazar_sheet_url') || "";
+
         let deleteTargetId = null;
         let uploadedBase64 = "";
 
